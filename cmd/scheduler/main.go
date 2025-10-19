@@ -16,8 +16,19 @@ func main() {
 
 	// HTTP handlers.
 	http.HandleFunc("/tasks", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodPost {
+		switch r.Method {
+		case http.MethodPost:
 			handleCreateTask(sched, w, r)
+		case http.MethodGet:
+			handleListTasks(sched, w, r)
+		default:
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
+	})
+
+	http.HandleFunc("/tasks/", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodGet {
+			handleGetTask(sched, w, r)
 			return
 		}
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -68,4 +79,15 @@ func handleGetTask(sched *scheduler.Scheduler, w http.ResponseWriter, r *http.Re
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(task)
+}
+
+func handleListTasks(sched *scheduler.Scheduler, w http.ResponseWriter, r *http.Request) {
+	tasks, err := sched.ListPendingTasks()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(tasks)
 }
