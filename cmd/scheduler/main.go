@@ -49,3 +49,23 @@ func handleCreateTask(sched *scheduler.Scheduler, w http.ResponseWriter, r *http
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(task)
 }
+
+func handleGetTask(sched *scheduler.Scheduler, w http.ResponseWriter, r *http.Request) {
+	taskID := r.URL.Path[len("/tasks/"):]
+	if taskID == "" {
+		http.Error(w, "Task ID required", http.StatusBadRequest)
+		return
+	}
+
+	task, err := sched.GetTaskStatus(taskID)
+	if err != nil {
+		if err == storage.ErrTaskNotFound {
+			http.Error(w, "Task not found", http.StatusNotFound)
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(task)
+}
