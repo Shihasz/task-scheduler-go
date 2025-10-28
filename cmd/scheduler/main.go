@@ -7,11 +7,12 @@ import (
 	"task-scheduler-go/internal/models"
 	"task-scheduler-go/internal/scheduler"
 	"task-scheduler-go/internal/storage"
+	"task-scheduler-go/pkg/shared"
 )
 
 func main() {
-	// Initialize storage and scheduler
-	store := storage.NewMemoryStorage()
+	// Use shared storage instance
+	var store storage.Storage = shared.StorageInstance
 	sched := scheduler.NewScheduler(store)
 
 	// HTTP handlers.

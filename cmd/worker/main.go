@@ -8,11 +8,12 @@ import (
 	"task-scheduler-go/internal/storage"
 	"task-scheduler-go/internal/worker"
 	"task-scheduler-go/internal/worker/executors"
+	"task-scheduler-go/pkg/shared"
 )
 
 func main() {
-	// Initialize storage (same as scheduler for now)
-	store := storage.NewMemoryStorage()
+	// Use shared storage instance
+	var store storage.Storage = shared.StorageInstance
 
 	// Create worker
 	workerID := "worker-1"
