@@ -31,7 +31,7 @@ type TaskExecutor interface {
 
 // Start begins the worker's  task polling and execution.
 func (w *Worker) Start(executors []TaskExecutor) {
-	log.Printf("Worker %s starting...", w.ID)
+	log.Printf("Worker %s starting with %d executors...", w.ID, len(executors))
 
 	ticker := time.NewTicker(2 * time.Second) // Poll every 2 seconds
 	defer ticker.Stop()
@@ -62,6 +62,7 @@ func (w *Worker) pollAndExecute(executors []TaskExecutor) {
 	}
 
 	if len(tasks) == 0 {
+		log.Printf("Worker %s: no pending tasks found", w.ID)
 		return // No tasks to process
 	}
 
@@ -75,6 +76,7 @@ func (w *Worker) pollAndExecute(executors []TaskExecutor) {
 
 // executeTask handles the execution of a single task.
 func (w *Worker) executeTask(task *models.Task, executors []TaskExecutor) {
+	log.Printf("Worker %s processing task %s (type: %s)", w.ID, task.ID, task.Type)
 	// Update task status to running
 	if err := w.storage.UpdateTask(task.ID, models.StatusRunning, "", ""); err != nil {
 		log.Printf("Worker %s failed to update task %s to running: %v", w.ID, task.ID, err)
