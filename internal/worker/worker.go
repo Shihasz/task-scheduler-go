@@ -82,4 +82,34 @@ func (w *Worker) executeTask(task *models.Task, executors []TaskExecutor) {
 	}
 
 	log.Printf("Worker %s executing task %s (type: %s)", w.ID, task.ID, task.Type)
+
+	// Find appropriate executor
+	var executor TaskExecutor
+	for _, ex := range executors {
+		if ex.CanHandle(task.Type) {
+			executor = ex
+			break
+		}
+	}
+
+	if executor == nil {
+		// No executor found for this task type
+		errMsg := "No executor found for task type: " + string(task.Type)
+		w.storage.UpdateTask(task.ID, models.StatusFailed, "", errMsg)
+		log.Printf("Worker %s failed to execute task %s: %s", w.ID, task.ID, errMsg)
+		return
+	}
+
+	// Execute the task
+	result, err := executor.Execute(task)
+	if err != nil {
+		// Task execution failed
+		w.storage.UpdateTask(task.ID, models.StatusFailed, "", err.Error())
+		log.Printf("Worker %s failed to execute task %s: %v", w.ID, task.ID, err)
+		return
+	}
+
+	// Task execution succeeded
+	w.storage.UpdateTask(task.ID, models.StatusCompleted, result, "")
+	log.Printf("Worker %s completed task %s: %s", w.ID, task.ID, result)
 }
