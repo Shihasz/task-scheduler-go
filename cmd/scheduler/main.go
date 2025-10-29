@@ -35,6 +35,17 @@ func main() {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	})
 
+	// Debug endpoint to see all tasks
+	http.HandleFunc("/debug/tasks", func(w http.ResponseWriter, r *http.Request) {
+		tasks, err := store.ListTasks("")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(tasks)
+	})
+
 	// Start server
 	port := ":8080"
 	log.Printf("Scheduler server running on port %s", port)
@@ -73,6 +84,7 @@ func handleGetTask(sched *scheduler.Scheduler, w http.ResponseWriter, r *http.Re
 	if err != nil {
 		if err == storage.ErrTaskNotFound {
 			http.Error(w, "Task not found", http.StatusNotFound)
+			return
 		}
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
