@@ -79,7 +79,12 @@ func main() {
 
 	// Start server
 	port := ":8080"
-	log.Printf("Scheduler server running on port %s", port)
+	log.Printf("Task Scheduler Server starting on port %s", port)
+	log.Printf("API Endpoints:")
+	log.Printf("	POST   /tasks         - Submit a new task")
+	log.Printf("	GET    /tasks         - List pending tasks")
+	log.Printf("	GET    /tasks/{id}    - Get task status")
+	log.Printf("	GET    /debug/tasks   - Debug all tasks")
 	log.Fatal(http.ListenAndServe(port, nil))
 }
 
