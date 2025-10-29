@@ -16,8 +16,12 @@ func NewPrintMessageExecutor() *PrintMessageExecutor {
 
 // Execute processes a print_message task.
 func (e *PrintMessageExecutor) Execute(task *models.Task) (string, error) {
+	log.Printf("Executing print message task with payload: %s", string(task.Payload))
+
+	// The payload should be JSON bytes, we need to unmarshal it.
 	var payload models.PrintMessagePayload
 	if err := json.Unmarshal(task.Payload, &payload); err != nil {
+		log.Printf("Failed to unmarshal print message payload: %v, payload: %s", err, string(task.Payload))
 		return "", err
 	}
 
@@ -27,7 +31,7 @@ func (e *PrintMessageExecutor) Execute(task *models.Task) (string, error) {
 	// Simulate some processing time.
 	// time.Sleep(100 * time.Millisecond)
 
-	return "Message printed successfully", nil
+	return "Message printed successfully: " + payload.Message, nil
 }
 
 // CanHandle returns true if this executor can handle the task type.
